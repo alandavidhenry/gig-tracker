@@ -1,0 +1,9 @@
+./src/assets/js/vendor/SplitType.js
+./webpack.config.js
+
+node_modules/
+dist/
+.next/
+
+eslint.config.mjs
+.vscode
