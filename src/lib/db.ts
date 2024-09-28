@@ -1,6 +1,4 @@
 import mysql from 'mysql2/promise'
-import local from 'next/font/local'
-import { env } from 'process'
 
 const db = mysql.createPool({
   host: process.env.MYSQL_HOST,
