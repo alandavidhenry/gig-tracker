@@ -4,6 +4,25 @@ import { useState } from 'react'
 import useSWR from 'swr'
 
 import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface Gig {
   id: number
@@ -24,6 +43,11 @@ interface NewGig {
   payment_method: string
 }
 
+interface EditGigModalProps {
+  gig: Gig
+  onSave: (updatedGig: Gig) => void
+}
+
 const fetcher = (url: string, init?: RequestInit) =>
   fetch(url, init).then((res) => {
     if (!res.ok) {
@@ -38,6 +62,180 @@ const formatDateForInput = (dateString: string | null): string => {
   return date.toISOString().split('T')[0]
 }
 
+const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
+  const [open, setOpen] = useState(false)
+  const [editedGig, setEditedGig] = useState<NewGig>({
+    date: formatDateForInput(gig.date),
+    employer: gig.employer,
+    location: gig.location,
+    payment_amount: gig.payment_amount.toString(),
+    payment_date: formatDateForInput(gig.payment_date),
+    payment_method: gig.payment_method || ''
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setEditedGig((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave({
+      ...gig,
+      ...editedGig,
+      date: formatDateForInput(editedGig.date),
+      // date: new Date(editedGig.date).toISOString(),
+      employer: editedGig.employer,
+      location: editedGig.location,
+      payment_amount: Number(editedGig.payment_amount),
+      payment_date: editedGig.payment_date
+        ? formatDateForInput(editedGig.payment_date)
+        : null,
+      payment_method: editedGig.payment_method || null
+    })
+    setOpen(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant='outline'>Edit</Button>
+      </DialogTrigger>
+      <DialogContent className='sm:max-w-[425px]'>
+        <DialogHeader>
+          <DialogTitle>Edit Gig</DialogTitle>
+          <DialogDescription>
+            Make changes to your gig here. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className='grid gap-4 py-4'>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='date' className='text-right'>
+                Date
+              </Label>
+              <Input
+                id='date'
+                name='date'
+                type='date'
+                value={editedGig.date}
+                onChange={handleInputChange}
+                className='col-span-3'
+              />
+            </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='employer' className='text-right'>
+                Employer
+              </Label>
+              <Input
+                id='employer'
+                name='employer'
+                value={editedGig.employer}
+                onChange={handleInputChange}
+                className='col-span-3'
+              />
+            </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='location' className='text-right'>
+                Location
+              </Label>
+              <Input
+                id='location'
+                name='location'
+                value={editedGig.location}
+                onChange={handleInputChange}
+                className='col-span-3'
+              />
+            </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='payment_amount' className='text-right'>
+                Payment amount (£)
+              </Label>
+              <Input
+                id='payment_amount'
+                name='payment_amount'
+                value={editedGig.payment_amount}
+                onChange={handleInputChange}
+                className='col-span-3'
+              />
+            </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='payment_date' className='text-right'>
+                Payment date
+              </Label>
+              <Input
+                id='payment_date'
+                name='payment_date'
+                type='date'
+                value={editedGig.payment_date}
+                onChange={handleInputChange}
+                className='col-span-3'
+              />
+            </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='payment_method' className='text-right'>
+                Payment method
+              </Label>
+              <Input
+                id='payment_method'
+                name='payment_method'
+                value={editedGig.payment_method}
+                onChange={handleInputChange}
+                className='col-span-3'
+              />
+            </div>
+          </div>
+          <Button type='submit'>Save changes</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export const GigTable: React.FC<{
+  gigs: Gig[]
+  onEdit: (gig: Gig) => void
+  onDelete: (id: number) => void
+}> = ({ gigs, onEdit, onDelete }) => {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Date</TableHead>
+          <TableHead>Employer</TableHead>
+          <TableHead>Location</TableHead>
+          <TableHead>Payment Amount</TableHead>
+          <TableHead>Payment Date</TableHead>
+          <TableHead>Payment Method</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {gigs.map((gig) => (
+          <TableRow key={gig.id}>
+            <TableCell>{new Date(gig.date).toLocaleDateString()}</TableCell>
+            <TableCell>{gig.employer}</TableCell>
+            <TableCell>{gig.location}</TableCell>
+            <TableCell>£{gig.payment_amount}</TableCell>
+            <TableCell>
+              {gig.payment_date
+                ? new Date(gig.payment_date).toLocaleDateString()
+                : 'N/A'}
+            </TableCell>
+            <TableCell>{gig.payment_method || 'N/A'}</TableCell>
+            <TableCell>
+              <EditGigModal gig={gig} onSave={onEdit} />
+              <Button variant='outline' onClick={() => onDelete(gig.id)}>
+                Delete
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
+}
+
 export default function Home() {
   const { data, error, mutate } = useSWR<Gig[]>('/api/gigs', fetcher)
   const [newGig, setNewGig] = useState<NewGig>({
@@ -49,7 +247,6 @@ export default function Home() {
     payment_method: ''
   })
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [editingGig, setEditingGig] = useState<Gig | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -85,34 +282,26 @@ export default function Home() {
     }
   }
 
-  const handleEdit = (gig: Gig) => {
-    setEditingGig({
-      ...gig,
-      date: formatDateForInput(gig.date),
-      payment_date: formatDateForInput(gig.payment_date)
-    })
-  }
-
-  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!editingGig) return
-
+  const handleEdit = async (updatedGig: Gig) => {
     try {
+      console.log('Sending updated gig to server:', updatedGig)
       const res = await fetch('/api/gigs', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingGig)
+        body: JSON.stringify(updatedGig)
       })
 
       if (res.ok) {
-        setEditingGig(null)
         mutate()
       } else {
-        throw new Error('Failed to update gig')
+        const errorData = await res.json()
+        console.error('Server response:', errorData)
+        throw new Error(`Failed to update gig: ${errorData.message || 'Unknown error'}`)
       }
     } catch (error) {
+      console.error('Full error object:', error)
       setSubmitError('Failed to update gig. Please try again.')
-      console.error('Update error:', error)
+      console.error('Update error:', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -197,94 +386,7 @@ export default function Home() {
         />
         <Button type='submit'>Add Gig</Button>
       </form>
-      <ul>
-        {data.map((gig: Gig) => (
-          <li key={gig.id} className='mb-2'>
-            {editingGig && editingGig.id === gig.id ? (
-              <form onSubmit={handleUpdate}>
-                <input
-                  type='date'
-                  value={editingGig.date}
-                  onChange={(e) =>
-                    setEditingGig({ ...editingGig, date: e.target.value })
-                  }
-                  className='border p-2 mr-2'
-                  required
-                />
-                <input
-                  type='text'
-                  value={editingGig.employer}
-                  onChange={(e) =>
-                    setEditingGig({ ...editingGig, employer: e.target.value })
-                  }
-                  className='border p-2 mr-2'
-                  required
-                />
-                <input
-                  type='text'
-                  value={editingGig.location}
-                  onChange={(e) =>
-                    setEditingGig({ ...editingGig, location: e.target.value })
-                  }
-                  className='border p-2 mr-2'
-                  required
-                />
-                <input
-                  type='number'
-                  value={editingGig.payment_amount}
-                  onChange={(e) =>
-                    setEditingGig({
-                      ...editingGig,
-                      payment_amount: Number(e.target.value)
-                    })
-                  }
-                  className='border p-2 mr-2'
-                  required
-                />
-                <input
-                  type='date'
-                  value={editingGig.payment_date || ''}
-                  onChange={(e) =>
-                    setEditingGig({
-                      ...editingGig,
-                      payment_date: e.target.value || null
-                    })
-                  }
-                  className='border p-2 mr-2'
-                  required
-                />
-                <input
-                  type='text'
-                  value={editingGig.payment_method || ''}
-                  onChange={(e) =>
-                    setEditingGig({
-                      ...editingGig,
-                      payment_method: e.target.value || null
-                    })
-                  }
-                  className='border p-2 mr-2'
-                  required
-                />
-                <Button type='submit'>Update</Button>
-                <Button type='button' onClick={() => setEditingGig(null)}>
-                  Cancel
-                </Button>
-              </form>
-            ) : (
-              <>
-                {new Date(gig.date).toLocaleDateString()} - {gig.employer} -
-                {gig.location} - £{gig.payment_amount} -
-                {gig.payment_date
-                  ? new Date(gig.payment_date).toLocaleDateString()
-                  : 'N/A'}{' '}
-                -{gig.payment_method ? gig.payment_method : 'N/A'}
-                <Button onClick={() => handleEdit(gig)}>Edit Gig</Button>
-                <Button onClick={() => handleDelete(gig.id)}>Delete Gig</Button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+      <GigTable gigs={data || []} onEdit={handleEdit} onDelete={handleDelete} />
     </div>
   )
 }
