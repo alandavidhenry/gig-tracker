@@ -11,7 +11,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NewGig } from '../types/gig'
-import { formatDateForInput } from '../lib/formatDate'
 
 interface AddGigModalProps {
   onSave: (newGig: NewGig) => void
@@ -56,7 +55,7 @@ const AddGigModal: React.FC<AddGigModalProps> = ({ onSave }) => {
         <DialogHeader>
           <DialogTitle>Add New Gig</DialogTitle>
           <DialogDescription>
-            Enter the details of the new gig here. Click save when you're done.
+            Enter the details of the new gig here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>

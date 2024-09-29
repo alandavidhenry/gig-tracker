@@ -58,7 +58,7 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
         <DialogHeader>
           <DialogTitle>Edit Gig</DialogTitle>
           <DialogDescription>
-            Make changes to your gig here. Click save when you're done.
+            Make changes to your gig here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>

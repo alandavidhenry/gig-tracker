@@ -1,16 +1,6 @@
 import { NextResponse } from 'next/server'
-import { RowDataPacket, ResultSetHeader } from 'mysql2'
+import { ResultSetHeader } from 'mysql2'
 import db from '@/lib/db'
-
-interface Gig extends RowDataPacket {
-  id: number
-  date: string
-  employer: string
-  location: string
-  payment_amount: number
-  payment_date: string | null
-  payment_method: string | null
-}
 
 export async function GET() {
   try {

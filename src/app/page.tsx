@@ -5,7 +5,6 @@ import useSWR from 'swr'
 import { Gig, NewGig } from '../types/gig'
 import { fetcher, addGig, updateGig, deleteGig } from '../api/gigApi'
 import GigTable from '../components/GigTable'
-import AddGigForm from '../components/AddGigForm'
 import AddGigModal from '@/components/AddGigModal'
 
 export default function Home() {
