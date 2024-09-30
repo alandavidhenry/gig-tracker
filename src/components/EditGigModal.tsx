@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Gig, NewGig } from '../types/gig'
-import { formatDateForInput } from '../lib/formatDate'
+import { formatDateForInput } from '@/lib/formatDate'
 
 interface EditGigModalProps {
   gig: Gig
@@ -38,12 +38,11 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
     e.preventDefault()
     onSave({
       ...gig,
-      ...editedGig,
-      date: formatDateForInput(editedGig.date),
+      date: new Date(editedGig.date),
+      employer: editedGig.employer,
+      location: editedGig.location,
       payment_amount: Number(editedGig.payment_amount),
-      payment_date: editedGig.payment_date
-        ? formatDateForInput(editedGig.payment_date)
-        : null,
+      payment_date: editedGig.payment_date ? new Date(editedGig.payment_date) : null,
       payment_method: editedGig.payment_method || null
     })
     setOpen(false)
@@ -58,7 +57,7 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
         <DialogHeader>
           <DialogTitle>Edit Gig</DialogTitle>
           <DialogDescription>
-            Make changes to your gig here. Click save when you are done.
+            Make changes to your gig here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -74,6 +73,7 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
                 value={editedGig.date}
                 onChange={handleInputChange}
                 className='col-span-3'
+                required
               />
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
@@ -86,6 +86,7 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
                 value={editedGig.employer}
                 onChange={handleInputChange}
                 className='col-span-3'
+                required
               />
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
@@ -98,6 +99,7 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
                 value={editedGig.location}
                 onChange={handleInputChange}
                 className='col-span-3'
+                required
               />
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
@@ -111,6 +113,7 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
                 value={editedGig.payment_amount}
                 onChange={handleInputChange}
                 className='col-span-3'
+                required
               />
             </div>
             <div className='grid grid-cols-4 items-center gap-4'>
@@ -121,7 +124,7 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
                 id='payment_date'
                 name='payment_date'
                 type='date'
-                value={editedGig.payment_date}
+                value={editedGig.payment_date || ''}
                 onChange={handleInputChange}
                 className='col-span-3'
               />
@@ -133,7 +136,7 @@ const EditGigModal: React.FC<EditGigModalProps> = ({ gig, onSave }) => {
               <Input
                 id='payment_method'
                 name='payment_method'
-                value={editedGig.payment_method}
+                value={editedGig.payment_method || ''}
                 onChange={handleInputChange}
                 className='col-span-3'
               />
