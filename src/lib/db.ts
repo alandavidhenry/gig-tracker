@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI as string
+const MONGODB_URI = process.env.MONGODB_URI
 
 if (!MONGODB_URI) {
   throw new Error(
@@ -9,19 +9,11 @@ if (!MONGODB_URI) {
 }
 
 interface MongooseCache {
-  conn: typeof mongoose | null
-  promise: Promise<typeof mongoose> | null
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
 }
 
-declare global {
-  var mongooseCache: MongooseCache | undefined
-}
-
-const cached = global.mongooseCache || { conn: null, promise: null }
-
-if (!global.mongooseCache) {
-  global.mongooseCache = cached
-}
+const cached: MongooseCache = { conn: null, promise: null }
 
 async function dbConnect(): Promise<typeof mongoose> {
   if (cached.conn) {
@@ -30,10 +22,10 @@ async function dbConnect(): Promise<typeof mongoose> {
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false
+      bufferCommands: false,
     }
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => {
       return mongoose
     })
   }
