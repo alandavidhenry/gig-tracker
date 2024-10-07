@@ -1,23 +1,43 @@
-import mysql from 'mysql2/promise'
+import mongoose from 'mongoose'
 
-const db = mysql.createPool({
-  host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MY_SQL_DATABASE,
-  port: parseInt(process.env.MYSQL_PORT || '3306'),
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  ...(process.env.NODE_ENV === 'production'
-    ? {
-        ssl: {
-          rejectUnauthorized: true,
-          ca: process.env.MYSQL_SSL_CA
-        }
-      }
-    : {})
-})
+const MONGODB_URI = process.env.MONGODB_URI
 
-export default db
+if (!MONGODB_URI) {
+  throw new Error(
+    'Please define the MONGODB_URI environment variable inside .env.local'
+  )
+}
 
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+const cached: MongooseCache = { conn: null, promise: null }
+
+async function dbConnect(): Promise<typeof mongoose> {
+  if (cached.conn) {
+    return cached.conn
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    }
+
+    cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => {
+      return mongoose
+    })
+  }
+
+  try {
+    cached.conn = await cached.promise
+  } catch (e) {
+    cached.promise = null
+    throw e
+  }
+
+  return cached.conn
+}
+
+export default dbConnect

@@ -1,114 +1,57 @@
-import { NextResponse } from 'next/server'
-import { ResultSetHeader } from 'mysql2'
-import db from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server'
+import dbConnect from '@/lib/db'
+import Gig from '@/models/Gig'
 
 export async function GET() {
+  await dbConnect()
   try {
-    const [rows] = await db.query('SELECT * FROM gigs')
-    return NextResponse.json(rows)
+    const gigs = await Gig.find({}).sort({ date: -1 })
+    console.log('Fetched gigs:', gigs)
+    return NextResponse.json({ success: true, data: gigs })
   } catch (error) {
-    console.error('GET error:', error)
-    return NextResponse.json(
-      { error: 'An error occurred while fetching gigs' },
-      { status: 500 }
-    )
+    console.error('Error fetching gigs:', error)
+    return NextResponse.json({ success: false }, { status: 400 })
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  await dbConnect()
   try {
-    const {
-      date,
-      employer,
-      location,
-      payment_amount,
-      payment_date,
-      payment_method
-    } = await request.json()
-
-    const [result] = await db.query<ResultSetHeader>(
-      'INSERT INTO gigs (date, employer, location, payment_amount, payment_date, payment_method) VALUES (?, ?, ?, ?, ?, ?)',
-      [date, employer, location, payment_amount, payment_date, payment_method]
-    )
-    return NextResponse.json(
-      {
-        id: result.insertId,
-        date,
-        employer,
-        location,
-        payment_amount,
-        payment_date,
-        payment_method
-      },
-      { status: 201 }
-    )
+    const body = await request.json()
+    const gig = await Gig.create(body)
+    return NextResponse.json({ success: true, data: gig }, { status: 201 })
   } catch (error) {
-    console.error('POST error:', error)
-    return NextResponse.json(
-      { error: 'An error occurred while creating a gig' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false }, { status: 400 })
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
+  await dbConnect()
   try {
-    const {
-      id,
-      date,
-      employer,
-      location,
-      payment_amount,
-      payment_date,
-      payment_method
-    } = await request.json()
-
-    const [result] = await db.query<ResultSetHeader>(
-      'UPDATE gigs SET date = ?, employer = ?, location = ?, payment_amount = ?, payment_date = ?, payment_method = ? WHERE id = ?',
-      [
-        date,
-        employer,
-        location,
-        payment_amount,
-        payment_date,
-        payment_method,
-        id
-      ]
-    )
-
-    if (result.affectedRows === 0) {
-      return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
+    const body = await request.json()
+    const gig = await Gig.findByIdAndUpdate(body._id, body, {
+      new: true,
+      runValidators: true
+    })
+    if (!gig) {
+      return NextResponse.json({ success: false }, { status: 400 })
     }
-
-    return NextResponse.json({ message: 'Gig updated successfully' })
+    return NextResponse.json({ success: true, data: gig })
   } catch (error) {
-    console.error('PUT error:', error)
-    return NextResponse.json(
-      { error: 'An error occurred while updating the gig' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false }, { status: 400 })
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
+  await dbConnect()
   try {
     const { id } = await request.json()
-
-    const [result] = await db.query<ResultSetHeader>(
-      'DELETE FROM gigs WHERE id = ?',
-      [id]
-    )
-
-    if (result.affectedRows === 0) {
-      return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
+    const deletedGig = await Gig.deleteOne({ _id: id })
+    if (!deletedGig) {
+      return NextResponse.json({ success: false }, { status: 400 })
     }
-
-    return NextResponse.json({ message: 'Gig deleted successfully' })
+    return NextResponse.json({ success: true, data: {} })
   } catch (error) {
-    console.error('DELETE error:', error)
-    return NextResponse.json(
-      { error: 'An error occurred while deleting the gig' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false }, { status: 400 })
   }
 }

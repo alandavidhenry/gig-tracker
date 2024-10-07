@@ -1,12 +1,16 @@
-export interface Gig {
-  id: number
-  date: string
+import { Document, Types } from 'mongoose'
+
+export interface GigData {
+  _id: string | Types.ObjectId
+  date: Date
   employer: string
   location: string
   payment_amount: number
-  payment_date: string | null
+  payment_date: Date | null
   payment_method: string | null
 }
+
+export interface Gig extends Omit<Document, '_id'>, GigData {}
 
 export interface NewGig {
   date: string
