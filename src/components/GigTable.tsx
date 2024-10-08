@@ -15,11 +15,11 @@ import { formatDateForDisplay } from '@/lib/formatDate'
 interface GigTableProps {
   gigsData: { success: boolean; data: Gig[] } | null | undefined
   onEdit: (gig: Gig) => void
-  onDelete: (id: string) => void // Changed to accept only string
+  onDelete: (id: string) => void
+  isLoading: boolean
 }
 
-const GigTable: React.FC<GigTableProps> = ({ gigsData, onEdit, onDelete }) => {
-  console.log('GigTable received gigsData:', gigsData)
+const GigTable: React.FC<GigTableProps> = ({ gigsData, onEdit, onDelete, isLoading }) => {
 
   if (!gigsData) {
     return <div>No gigs data available.</div>
@@ -73,6 +73,13 @@ const GigTable: React.FC<GigTableProps> = ({ gigsData, onEdit, onDelete }) => {
             </TableCell>
           </TableRow>
         ))}
+        {isLoading && (
+          <TableRow>
+            <TableCell colSpan={7} className='text-center'>
+              Loading...
+            </TableCell>
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   )

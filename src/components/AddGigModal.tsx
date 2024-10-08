@@ -14,9 +14,10 @@ import { NewGig } from '../types/gig'
 
 interface AddGigModalProps {
   onSave: (newGig: NewGig) => void
+  isLoading: boolean
 }
 
-const AddGigModal: React.FC<AddGigModalProps> = ({ onSave }) => {
+const AddGigModal: React.FC<AddGigModalProps> = ({ onSave, isLoading }) => {
   const [open, setOpen] = useState(false)
   const [newGig, setNewGig] = useState<NewGig>({
     date: '',
@@ -136,7 +137,9 @@ const AddGigModal: React.FC<AddGigModalProps> = ({ onSave }) => {
               />
             </div>
           </div>
-          <Button type='submit'>Save New Gig</Button>
+          <Button type='submit' disabled={isLoading}>
+            {isLoading ? 'Saving...' : 'Save New Gig'}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

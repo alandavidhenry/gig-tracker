@@ -17,16 +17,19 @@ export default function Home() {
     }
   )
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleAddGig = async (newGig: NewGig) => {
     setSubmitError(null)
+    setIsLoading(true)
     try {
       await addGig(newGig)
       await mutate()
-      console.log('Data after adding:', data)
     } catch (error) {
       setSubmitError('Failed to add gig. Please try again.')
       console.error('Submit error:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -54,16 +57,19 @@ export default function Home() {
     return <div>Failed to load gigs data. Please try refreshing the page.</div>
   if (!data) return <div>Loading...</div>
 
-  console.log('Rendering with data:', data)
-
   return (
     <div className='container mx-auto p-4'>
       <h1 className='text-2xl font-bold mb-4'>Gig Tracker</h1>
       {submitError && <div className='text-red-500 mb-4'>{submitError}</div>}
       <div className='mb-4'>
-        <AddGigModal onSave={handleAddGig} />
+        <AddGigModal onSave={handleAddGig} isLoading={isLoading} />
       </div>
-      <GigTable gigsData={data} onEdit={handleEdit} onDelete={handleDelete} />
+      <GigTable
+        gigsData={data}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        isLoading={isLoading}
+      />
     </div>
   )
 }

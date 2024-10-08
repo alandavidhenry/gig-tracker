@@ -6,7 +6,6 @@ export async function GET() {
   await dbConnect()
   try {
     const gigs = await Gig.find({}).sort({ date: -1 })
-    console.log('Fetched gigs:', gigs)
     return NextResponse.json({ success: true, data: gigs })
   } catch (error) {
     console.error('Error fetching gigs:', error)
