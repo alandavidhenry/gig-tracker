@@ -11,6 +11,7 @@ import {
 import { Gig } from '@/types/gig'
 import EditGigModal from './EditGigModal'
 import { formatDateForDisplay } from '@/lib/formatDate'
+import { ArrowUpIcon } from 'lucide-react'
 
 interface GigTableProps {
   gigsData: { success: boolean; data: Gig[] } | null | undefined
@@ -19,8 +20,12 @@ interface GigTableProps {
   isLoading: boolean
 }
 
-const GigTable: React.FC<GigTableProps> = ({ gigsData, onEdit, onDelete, isLoading }) => {
-
+const GigTable: React.FC<GigTableProps> = ({
+  gigsData,
+  onEdit,
+  onDelete,
+  isLoading
+}) => {
   if (!gigsData) {
     return <div>No gigs data available.</div>
   }
@@ -44,7 +49,9 @@ const GigTable: React.FC<GigTableProps> = ({ gigsData, onEdit, onDelete, isLoadi
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Date</TableHead>
+          <TableHead>
+            Date <ArrowUpIcon className='inline-block w-4 h-4 ml-1' />
+          </TableHead>
           <TableHead>Employer</TableHead>
           <TableHead>Location</TableHead>
           <TableHead>Payment Amount</TableHead>
